@@ -79,7 +79,7 @@ function getLoginUser(req){
     try{
       const {username} = jwt.verify(token, req.app.get('secretKey'));
       const sql = 'SELECT * FROM User WHERE username = ?';
-      req.app.get().query(sql, [username], (error, results)=>{
+      req.app.get('db').query(sql, [username], (error, results)=>{
         if(error) reject(error);
         else{
           if(results.length === 0) resolve(null);
