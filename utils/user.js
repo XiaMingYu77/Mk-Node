@@ -1,5 +1,3 @@
-const { error, log } = require("console");
-const { resolve } = require("path");
 const jwt = require('jsonwebtoken');
 
 /*
@@ -75,7 +73,7 @@ async function userIdentify(req, res, next){
 // 获取用户登录态（从cookie中拿）
 // 无cookie直接回空
 function getLoginUser(req){
-  return new Promise(async (resolve, reject)=>{
+  return new Promise((resolve, reject)=>{
     const token = req.cookies.token;
     if(!token) resolve(null);
     try{

@@ -20,8 +20,6 @@ router.use('/signup',[
   if(checkParams(req, res)){
     const db = req.app.get('db');
     const {username, password, remember} = req.body;
-    // 传过来的是表单，会处理成字符串
-    remember = parseInt(remember);
     // 查username是否唯一
     const isOnlyName = !(await testUserExist(db, username));
     if(isOnlyName){

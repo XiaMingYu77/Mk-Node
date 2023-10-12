@@ -55,7 +55,7 @@ app.set('db', db);
 // 设置api路由
 app.use('/api', router);
 
-const server = app.listen(8211, ()=>{
+app.listen(8211, ()=>{
   console.log('服务启动，http://127.0.0.1:8211/');
 });
 
@@ -67,6 +67,7 @@ app.use(function(err, req, res, next) {
     msg: err,
     data: {}
   });
+  next();
 });
 
 // 退出服务关闭数据库
