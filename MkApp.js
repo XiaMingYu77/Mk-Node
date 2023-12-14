@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 app.use(
   cors({ // 跨域设置
-    origin: 'http://localhost:8099', // 允许的域名
+    origin: '*', // 允许的域名
     methods: ['GET', 'POST'], // 允许的 HTTP 方法
     credentials: true
   })
@@ -31,8 +31,8 @@ const CODE_TYPE = {
 app.set('CODE_TYPE', CODE_TYPE);
 app.set('secretKey', 'Moming Love KK');
 
-// 文件服务
-app.get('/', (req, res)=>{
+// 静态服务
+app.get('/', (req, res) => {
   console.log('收到请求');
   res.send({
     code: 200,
@@ -55,12 +55,12 @@ app.set('db', db);
 // 设置api路由
 app.use('/api', router);
 
-app.listen(8211, ()=>{
+app.listen(8211, () => {
   console.log('服务启动，http://127.0.0.1:8211/');
 });
 
 // 错误处理中间件
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   console.error(err.stack); // 打印错误堆栈信息
   res.send({
     code: app.get('CODE_TYPE').SERVER_ERROR,
@@ -71,20 +71,20 @@ app.use(function(err, req, res, next) {
 });
 
 // 退出服务关闭数据库
-process.on('SIGINT', function() {
+process.on('SIGINT', function () {
   console.log('\nGracefully shutting down from SIGINT (Ctrl+C)');
   // 关闭数据库连接
-  db.end((err)=>{
-    if(err) console.log('关闭数据库连接时发生错误:', err);
+  db.end((err) => {
+    if (err) console.log('关闭数据库连接时发生错误:', err);
     process.exit()
   });
 });
 
-process.on('SIGTERM', function() {
+process.on('SIGTERM', function () {
   console.log('\nGracefully shutting down from SIGTERM');
   // 关闭数据库连接
-  db.end((err)=>{
-    if(err) console.log('关闭数据库连接时发生错误:', err);
+  db.end((err) => {
+    if (err) console.log('关闭数据库连接时发生错误:', err);
     process.exit()
   });
 });

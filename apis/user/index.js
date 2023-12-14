@@ -12,20 +12,27 @@ const REMEMBER_STATE = {
 }
 const NEW_USER_NAME = 'newUser'
 
-router.use('/signup',[
+
+// 注册
+/**
+ * @param { string } username 用户名
+ * @param { string } password 密码
+ * @param { number } remember 是否记住
+ */
+router.use('/signup', [
   check('username', '用户名必填').not().isEmpty().not().matches(/[\u4E00-\u9FA5]/),
   check('password', '密码必填').not().isEmpty(),
   check('remember', 'remember不可为空').not().isEmpty().isNumeric(),
-], async (req, res)=>{
-  if(checkParams(req, res)){
+], async (req, res) => {
+  if (checkParams(req, res)) {
     const db = req.app.get('db');
-    const {username, password, remember} = req.body;
+    const { username, password, remember } = req.body;
     // 查username是否唯一
     const isOnlyName = !(await testUserExist(db, username));
-    if(isOnlyName){
+    if (isOnlyName) {
       await signup(db, username, password, NEW_USER_NAME);
       // 注册成功返回
-      if(remember === REMEMBER_STATE.YES){
+      if (remember === REMEMBER_STATE.YES) {
         rememberUser(res, username, req.app.get('secretKey'));
       }
       res.send({
@@ -37,7 +44,7 @@ router.use('/signup',[
           isManager: 0,
         }
       });
-    }else{
+    } else {
       res.send({
         code: req.app.get('CODE_TYPE').CLIENT_ERROR,
         msg: '用户名已被使用',
@@ -47,18 +54,24 @@ router.use('/signup',[
   }
 });
 
+// 登录
+/**
+ * @param { string } username 用户名
+ * @param { string } password 密码
+ * @param { number } remember 是否记住
+ */
 router.use('/signin', [
   check('username', '用户名必填').not().isEmpty().not().matches(/[\u4E00-\u9FA5]/),
   check('password', '密码必填').not().isEmpty(),
   check('remember', 'remember不可为空').not().isEmpty().isNumeric(),
-], async (req, res)=>{
-  if(checkParams(req, res)){
+], async (req, res) => {
+  if (checkParams(req, res)) {
     const db = req.app.get('db');
-    const {username, password, remember} = req.body;
+    const { username, password, remember } = req.body;
     const user = await signin(db, username, password);
     // 登录成功返回
-    if(user){
-      if(remember === REMEMBER_STATE.YES){
+    if (user) {
+      if (remember === REMEMBER_STATE.YES) {
         rememberUser(res, username, req.app.get('secretKey'));
       }
       res.send({
@@ -70,7 +83,7 @@ router.use('/signin', [
           isManager: user.isManager,
         }
       });
-    }else{ // 用户名或密码错误
+    } else { // 用户名或密码错误
       res.send({
         code: req.app.get('CODE_TYPE').CLIENT_ERROR,
         msg: '账号或密码错误',
@@ -80,21 +93,22 @@ router.use('/signin', [
   }
 });
 
-router.use('/loginstatus', async (req, res)=>{
+// 校验登录状态
+router.use('/loginstatus', async (req, res) => {
   const user = await getLoginUser(req);
-  if(user){
+  if (user) {
     const sendUser = {
       username: user.username,
       name: user.name,
       isManager: user.isManager,
     };
     sendLoginState(req, res, 1, sendUser);
-  }else{
+  } else {
     sendLoginState(req, res, 0, null);
   }
 });
 
-function sendLoginState(req, res, isLogin, user){
+function sendLoginState(req, res, isLogin, user) {
   res.send({
     code: req.app.get('CODE_TYPE').SUCCESS,
     msg: '操作成功',
