@@ -25,6 +25,7 @@ app.use(
 // 设置返回code枚举值
 const CODE_TYPE = {
   SUCCESS: 200, // 成功
+  UNLOGIN: 102, // 未登录
   CLIENT_ERROR: 400, // 请求异常
   SERVER_ERROR: 500, // 服务异常
 }
@@ -42,13 +43,14 @@ app.get('/', (req, res) => {
 });
 
 // 启动mysql
-var mysql = require('mysql');
+var mysql = require('mysql2');
 var db = mysql.createConnection({
   host: '127.0.0.1',
   port: '3306',
   user: 'root',
-  password: '11111111',
-  database: 'MkBlog',
+  password: '111111',
+  database: 'lowcode',
+  useConnectionPooling: true,
 });
 app.set('db', db);
 
@@ -64,7 +66,7 @@ app.use(function (err, req, res, next) {
   console.error(err.stack); // 打印错误堆栈信息
   res.send({
     code: app.get('CODE_TYPE').SERVER_ERROR,
-    msg: err,
+    msg: '出现未知异常请联系管理员',
     data: {}
   });
   next();
@@ -87,4 +89,10 @@ process.on('SIGTERM', function () {
     if (err) console.log('关闭数据库连接时发生错误:', err);
     process.exit()
   });
+});
+
+// 异常兜底
+process.on('uncaughtException', (err) => {
+  console.log('=====异常兜底=====')
+  console.error(err);
 });
