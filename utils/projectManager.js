@@ -86,9 +86,8 @@ function getProjectList(db, searchObj, pageSize, pageNumber){
       searchStr += searchStr ? ` AND ${key} = ${searchObj[key]} ` : ` ${key} = ${searchObj[key]} `
     }
   }
-  console.log(searchStr);
   // 按照更新时间降序排列，分页
-  const sql = `select projectId,name,coverPic,createTime,status,userId,updateTime from Project where ${searchStr} AND updateTime < (select updateTime from Project order by updateTime DESC limit ?, 1) order by updateTime DESC limit ?;`
+  const sql = `select projectId,name,coverPic,createTime,status,userId,updateTime from Project where ${searchStr} order by updateTime DESC limit ?, ?;`
   return new Promise((resolve, reject)=>{
     db.query(sql, [pageNumber*pageSize, pageSize], async (error, result) => {
       if(error) return reject(error);

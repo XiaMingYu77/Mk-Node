@@ -91,9 +91,9 @@ router.use('/update', [
 
 router.use('/publish', [
   check('key').notEmpty(),
-  check('projectName').notEmpty(),
-  check('jsonData').notEmpty(),
-  check('picUrl').notEmpty()
+  check('projectName'),
+  check('jsonData'),
+  check('picUrl')
 ], async (req, res)=>{
   if(!checkParams(req, res)) return;
   const db = req.app.get('db');

@@ -10,7 +10,7 @@ var app = express();
 // 设置web工程的根目录 /
 app.use(express.static(__dirname + '/'));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
