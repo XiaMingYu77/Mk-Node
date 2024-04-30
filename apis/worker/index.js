@@ -7,7 +7,8 @@ const {
   ProjectStatusMap,
   createProject,
   updateProject,
-  getProject
+  getProject,
+  getProjectList
 } = require('../../utils/projectManager');
 
 const router = express.Router();
@@ -148,6 +149,32 @@ router.use('/unpublish', [check('key').notEmpty()], async (req, res)=>{
     res.send({
       code: req.app.get('CODE_TYPE').CLIENT_ERROR,
       msg: '下架失败',
+    });
+  }
+})
+
+router.get('/projectList', [
+  check('pageSize').notEmpty().isInt(),
+  check('pageNumber').notEmpty().isInt(),
+], async (req, res)=>{
+  if(!checkParams(req, res)) return;
+  const db = req.app.get('db');
+  const query = req.query;
+  const { pageSize, pageNumber } = req.query;
+  delete query.pageSize;
+  delete query.pageNumber;
+  query.userId = req.userId;
+  try{
+    const ans = await getProjectList(db, query, Number(pageSize), Number(pageNumber));
+    res.send({
+      code: req.app.get('CODE_TYPE').SUCCESS,
+      msg: '操作成功',
+      data: ans
+    });
+  }catch(e){
+    res.send({
+      code: req.app.get('CODE_TYPE').SERVER_ERROR,
+      msg: e,
     });
   }
 })
