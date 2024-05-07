@@ -65,6 +65,7 @@ router.use('/login', [
     // 登录成功返回
     if (user) {
       delete user.password;
+      delete user.salt;
       rememberUser(res, user.userId, req.app.get('secretKey'));
       res.send({
         code: req.app.get('CODE_TYPE').SUCCESS,

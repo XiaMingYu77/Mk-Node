@@ -1,10 +1,36 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto'); // 加密
+// 加密函数
+function hashPassword(password) {
+    // 生成随机的盐值
+    const salt = crypto.randomBytes(32).toString('hex');
+    // 将密码与盐值组合
+    const passwordSalt = password + salt;
+    // 使用SHA-256哈希函数对密码和盐值进行加密
+    const hashedPassword = crypto.createHash('sha256').update(passwordSalt).digest('hex');
+    
+    return { hashedPassword, salt };
+}
+// 对输入的password进行校验
+function verifyPassword(password, hashedPassword, salt) {
+    // 将输入的密码与盐值组合
+    const passwordSalt = password + salt;
+    // 使用SHA-256哈希函数对密码和盐值进行加密
+    const hashedInputPassword = crypto.createHash('sha256').update(passwordSalt).digest('hex');
+    // 验证输入的密码与存储的哈希密码是否一致
+    return hashedInputPassword === hashedPassword;
+}
 
 function getUser(db, username) {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM User WHERE username = ?';
     db.query(sql, [username], (error, results) => {
-      if (results[0]) resolve(results[0]);
+      if (results[0]) {
+        const user = results[0];
+        delete user.salt;
+        delete user.password;
+        resolve(user);
+      }
       else reject();
     })
   })
@@ -14,7 +40,12 @@ function getUserById(db, userId) {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM User WHERE userId = ?';
     db.query(sql, [userId], (error, results) => {
-      if (results[0]) resolve(results[0]);
+      if (results[0]) {
+        const user = results[0];
+        delete user.salt;
+        delete user.password;
+        resolve(user);
+      }
       else reject();
     })
   })
@@ -25,9 +56,10 @@ function getUserById(db, userId) {
 */
 // 注册
 function signup(db, username, password, nickName) {
+  const { hashedPassword, salt } = hashPassword(password);
   return new Promise((resolve, reject) => {
-    const sql = 'INSERT INTO User (username, password, nickName) VALUES (?, ?, ?);';
-    db.query(sql, [username, password, nickName], async (error) => {
+    const sql = 'INSERT INTO User (username, password, nickName, salt) VALUES (?, ?, ?, ?);';
+    db.query(sql, [username, hashedPassword, nickName, salt], async (error) => {
       if (error) reject(error);
       const user = await getUser(db, username);
       resolve(user);
@@ -46,7 +78,7 @@ function signin(db, username, password) { // 登录成功返回user，失败返�
           return;
         }
         const user = results[0];
-        if (user.password !== password){
+        if (!verifyPassword(password, user.password, user.salt)){
           resolve(null);
           return
         }
@@ -75,7 +107,9 @@ function rememberUser(res, userId, secretKey) {
   };
   const token = jwt.sign(payload, secretKey);
   res.cookie('token', token, {
-    maxAge: 1296000000 // 15天
+    maxAge: 1296000000, // 15天
+    sameSite: 'None',
+    secure: 'true'
   });
 }
 
@@ -139,7 +173,9 @@ function updateUser(db, userId, { username, nickName, password }){
     updateFields.nickName = nickName;
   }
   if (password) {
-    updateFields.password = password;
+    const { hashedPassword, salt } = hashPassword(password);
+    updateFields.password = hashedPassword;
+    updateFields.salt = salt;
   }
 
   return new Promise((resolve, reject)=>{

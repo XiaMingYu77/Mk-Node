@@ -45,8 +45,8 @@ app.get('/', (req, res) => {
 // 启动mysql
 var mysql = require('mysql2');
 const config = {
-  host: '127.0.0.1',
-  port: '3306',
+  host: '5.tcp.vip.cpolar.cn',
+  port: '14362',
   user: 'lowcode',
   password: 'yumi.ljh123',
   database: 'lowcode',
