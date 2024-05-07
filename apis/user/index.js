@@ -33,12 +33,15 @@ router.use('/signup', [
     if (isOnlyName) {
       const user = await signup(db, username, password, NEW_USER_NAME);
       delete user.password;
-      rememberUser(res, user.userId, req.app.get('secretKey'));
+      const token = rememberUser(res, user.userId, req.app.get('secretKey'));
       // 注册成功返回
       res.send({
         code: req.app.get('CODE_TYPE').SUCCESS,
         msg: '操作成功',
-        data: user
+        data: {
+          ...user,
+          token
+        }
       });
     } else {
       res.send({
@@ -66,11 +69,14 @@ router.use('/login', [
     if (user) {
       delete user.password;
       delete user.salt;
-      rememberUser(res, user.userId, req.app.get('secretKey'));
+      const token = rememberUser(res, user.userId, req.app.get('secretKey'));
       res.send({
         code: req.app.get('CODE_TYPE').SUCCESS,
         msg: '操作成功',
-        data: user
+        data: {
+          ...user,
+          token
+        }
       });
     } else { // 用户名或密码错误
       res.send({

@@ -106,16 +106,12 @@ function rememberUser(res, userId, secretKey) {
     userId
   };
   const token = jwt.sign(payload, secretKey);
-  res.cookie('token', token, {
-    maxAge: 1296000000, // 15天
-    sameSite: 'None',
-    secure: 'true'
-  });
+  return token;
 }
 
 // 用户鉴权中间件
 async function userIdentify(req, res, next) {
-  const token = req.cookies.token;
+  const token = req.headers.token;
   if (!token) {
     res.send({
       code: req.app.get('CODE_TYPE').UNLOGIN,
@@ -140,11 +136,10 @@ async function userIdentify(req, res, next) {
   }
 }
 
-// 获取用户登录态（从cookie的Token中拿）
-// 无cookie直接回空
+// 获取用户登录态（从header中获取）
 function getLoginUser(req) {
   return new Promise((resolve, reject) => {
-    const token = req.cookies.token;
+    const token = req.headers.token;
     if (!token) return resolve(null);
     try {
       const { userId } = jwt.verify(token, req.app.get('secretKey'));
