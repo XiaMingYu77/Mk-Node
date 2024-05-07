@@ -8,6 +8,13 @@ const router = express.Router();
 
 const NEW_USER_NAME = 'newUser'
 
+router.get('/test', (req, res)=>{
+  res.send({
+    code: req.app.get('CODE_TYPE').SUCCESS,
+    msg: 'test',
+    data: 'testData'
+  })
+})
 
 // 注册
 /**

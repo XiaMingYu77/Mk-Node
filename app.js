@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 app.use(
   cors({ // 跨域设置
-    origin: '*', // 允许的域名
+    origin: ['http://127.0.0.1:8099', 'http://42.193.126.123:8099'], // 允许的域名
     methods: ['GET', 'POST'], // 允许的 HTTP 方法
     credentials: true
   })
@@ -44,14 +44,32 @@ app.get('/', (req, res) => {
 
 // 启动mysql
 var mysql = require('mysql2');
-var db = mysql.createConnection({
+const config = {
   host: '127.0.0.1',
   port: '3306',
-  user: 'root',
-  password: '111111',
+  user: 'lowcode',
+  password: 'yumi.ljh123',
   database: 'lowcode',
   useConnectionPooling: true,
-});
+}
+var db;
+function handleError (err) {
+  if (err) {
+    // 如果是连接断开，自动重新连接
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      connect();
+    } else {
+      console.error(err.stack || err);
+    }
+  }
+}
+// 连接数据库
+function connect () {
+  db = mysql.createConnection(config);
+  db.connect(handleError);
+  db.on('error', handleError);
+}
+connect();
 app.set('db', db);
 
 // 设置api路由
@@ -71,6 +89,14 @@ app.use(function (err, req, res, next) {
   });
   next();
 });
+
+app.get('/test', (req, res)=>{
+  res.send({
+    code: app.get('CODE_TYPE').SUCCESS,
+    msg: 'test',
+    data: 'testData'
+  })
+})
 
 // 退出服务关闭数据库
 process.on('SIGINT', function () {

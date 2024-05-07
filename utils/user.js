@@ -87,6 +87,7 @@ async function userIdentify(req, res, next) {
       code: req.app.get('CODE_TYPE').UNLOGIN,
       msg: '未登录',
     });
+    return;
   }
   try {
     const payload = jwt.verify(token, req.app.get('secretKey'));
@@ -110,7 +111,7 @@ async function userIdentify(req, res, next) {
 function getLoginUser(req) {
   return new Promise((resolve, reject) => {
     const token = req.cookies.token;
-    if (!token) resolve(null);
+    if (!token) return resolve(null);
     try {
       const { userId } = jwt.verify(token, req.app.get('secretKey'));
       const sql = 'SELECT * FROM User WHERE userId = ?';

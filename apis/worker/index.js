@@ -39,6 +39,14 @@ router.use('/create', [
   }
 });
 
+router.get('/test', (req, res)=>{
+  res.send({
+    code: req.app.get('CODE_TYPE').SUCCESS,
+    msg: 'test',
+    data: 'testData'
+  })
+})
+
 router.get('/projectdata', [
   check('key').notEmpty()
 ], async (req, res)=>{
