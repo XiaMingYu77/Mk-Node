@@ -97,10 +97,7 @@ function testUserExist(db, userId) {
     })
   })
 }
-/*
-  当需要cookie记住用户时调用
-  过期由cookie过期控制
-*/
+
 function rememberUser(res, userId, secretKey) {
   const payload = {
     userId

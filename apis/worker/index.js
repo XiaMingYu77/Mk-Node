@@ -13,6 +13,28 @@ const {
 
 const router = express.Router();
 
+router.get('/projectdata', [
+  check('key').notEmpty()
+], async (req, res)=>{
+  if(!checkParams(req, res)) return;
+  const db = req.app.get('db');
+  const { key } = req.query;
+  try{
+    const projectData = await getProject(db, key);
+    res.send({
+      code: req.app.get('CODE_TYPE').SUCCESS,
+      msg: '操作成功',
+      data: projectData
+    });
+  }catch(e){
+    res.send({
+      code: '404',
+      msg: '项目不存在',
+    });
+  }
+});
+
+// 后面的要进行用户鉴权
 router.use(userIdentify);
 router.use('/create', [
   check('projectName', '项目名必填').not().isEmpty(),
@@ -46,27 +68,6 @@ router.get('/test', (req, res)=>{
     data: 'testData'
   })
 })
-
-router.get('/projectdata', [
-  check('key').notEmpty()
-], async (req, res)=>{
-  if(!checkParams(req, res)) return;
-  const db = req.app.get('db');
-  const { key } = req.query;
-  try{
-    const projectData = await getProject(db, key);
-    res.send({
-      code: req.app.get('CODE_TYPE').SUCCESS,
-      msg: '操作成功',
-      data: projectData
-    });
-  }catch(e){
-    res.send({
-      code: '404',
-      msg: '项目不存在',
-    });
-  }
-});
 
 router.use('/update', [
   check('key').notEmpty(),

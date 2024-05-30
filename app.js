@@ -56,11 +56,9 @@ var db;
 function handleError (err) {
   if (err) {
     // 如果是连接断开，自动重新连接
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-      connect();
-    } else {
-      console.error(err.stack || err);
-    }
+    console.error(err);
+    // 2s后重试
+    setTimeout(connect, 2000);
   }
 }
 // 连接数据库
@@ -68,9 +66,9 @@ function connect () {
   db = mysql.createConnection(config);
   db.connect(handleError);
   db.on('error', handleError);
+  app.set('db', db);
 }
 connect();
-app.set('db', db);
 
 // 设置api路由
 app.use('/api', router);
